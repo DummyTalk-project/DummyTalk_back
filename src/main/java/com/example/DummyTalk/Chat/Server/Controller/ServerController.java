@@ -90,19 +90,12 @@ public class ServerController {
 
 
     /* 서버에 해당하는 채널 리스트 */
-    @GetMapping("/{serverId}/channel/list/{userId}")
-    public ResponseEntity<List<ChannelDto>> channelList(@PathVariable Long serverId, @PathVariable Long userId) {
+    @GetMapping("/{serverId}/channel/list")
+    public ResponseEntity<List<ChannelDto>> channelList(@PathVariable Long serverId) {
+        List<ChannelDto> channelDtoList = channelServiceImpl.findByChannelList(serverId);
+        System.out.println("채널 리스트 (컨트롤러) >>>>>>>>> : " + channelDtoList);
 
-        try {
-
-            List<ChannelDto> channelDtoList = channelServiceImpl.findByChannelList(serverId, userId);
-            System.out.println("채널 리스트 (컨트롤러) >>>>>>>>> : " + channelDtoList);
-
-            return ResponseEntity.ok(channelDtoList);
-        } catch (RuntimeException e){
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        return ResponseEntity.ok(channelDtoList);
 
     }
     /* 채널 삭제 */
