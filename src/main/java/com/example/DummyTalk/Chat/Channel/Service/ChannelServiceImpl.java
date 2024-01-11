@@ -105,6 +105,7 @@ public class ChannelServiceImpl implements ChannelService {
                 .channelName(channelDto.getChannelName())
                 .serverId(channelDto.getServerId())
                 .channelType(type)
+                .maxUserCnt(channelDto.getMaxUserCnt()) // MaxUserCnt 값 설정
                 .build();
 
         ChannelEntity responseChannelEntity = channelRepository.save(channelEntity);
@@ -117,11 +118,14 @@ public class ChannelServiceImpl implements ChannelService {
     public ChannelDto getChannelType(Long channelId) {
         ChannelEntity channelEntity = channelRepository.findById(channelId).orElse(null);
         if (channelEntity != null) {
-            return new ChannelDto(channelEntity.getChannelId(),
-                    channelEntity.getServerId(),
-                    channelEntity.getChannelName(),
-                    channelEntity.getChannelCount(),
-                    channelEntity.getChannelType());
+            return ChannelDto.builder()
+                    .channelId(channelEntity.getChannelId())
+                    .serverId(channelEntity.getServerId())
+                    .channelName(channelEntity.getChannelName())
+                    .channelCount(channelEntity.getChannelCount())
+                    .channelType(channelEntity.getChannelType())
+                    .maxUserCnt(channelEntity.getMaxUserCnt())
+                    .build();
         }
         return null;
     }

@@ -46,7 +46,7 @@ public class ChatDataEntity extends BaseTimeEntity {
     /* 채널 데이터와 번역된 텍스트의 연관관계 (부모) */
     @Builder.Default
     @OneToMany( mappedBy = "channelDataId", fetch = FetchType.LAZY)
-    private List<TranslatedTextEntity> translatedTextList = new ArrayList<>();
+    private List<TranslatedTextEntity> translatedTextEntityList = new ArrayList<>();
 
     /* 채널 데이터와 이미지의 연관관계 (부모) */
     @Builder.Default

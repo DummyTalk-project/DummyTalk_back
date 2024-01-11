@@ -18,5 +18,6 @@ public class ChannelDto {
     private String channelName;
     private int channelCount;
     private ChannelEntity.ChannelType channelType;
+    private ChannelEntity.MaxUserCnt maxUserCnt;
 
 }

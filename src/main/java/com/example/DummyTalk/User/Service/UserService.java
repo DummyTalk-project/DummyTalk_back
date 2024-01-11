@@ -18,16 +18,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.kms.KmsClient;
 
 import javax.crypto.SecretKey;
 import java.io.ByteArrayInputStream;
@@ -48,7 +42,7 @@ import java.util.zip.*;
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
-public class UserService  {
+public class UserService extends AESUtil {
 
     @Value("${serverAbsolutePath.dir}")
     private String absolutePath;
@@ -59,9 +53,6 @@ public class UserService  {
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final AwsS3Service awsS3UploadService;
-    private final AESUtil aesUtil;
-    private final Environment env;
-    private final KmsClient kmsClient;
 
     private final String BUCKET_DIR = "profile/";
 
@@ -80,24 +71,30 @@ public class UserService  {
             byte[] keyBytes = generateRandomBytes(keyLength);
 
             // Base64로 인코딩하여 JWT 시크릿 키 생성
-            String jwtKey = Base64.getEncoder().encodeToString(keyBytes);
+//            String jwtKey = Base64.getEncoder().encodeToString(keyBytes);
 
-            // AWS KMS(AES 256)를 활용한 암호화
-            String encrtptJWT = aesUtil.encrypt(kmsClient, jwtKey);
+            // 랜덤한 AES키 생성
+//            SecretKey aesKey = AESUtil.generateAESKey();
+
+//            byte[] encrtptJWT = AESUtil.encrypt(jwtKey, aesKey);
 
             // 서울시간으로 가져오기 위해 + 9시간
             LocalDateTime currentDateTime = LocalDateTime.now();
             LocalDateTime plus9Hours = currentDateTime.plusHours(9);
 
-
-            userDTO.setCreateAt(plus9Hours);                                    // 유저에게 현재 시간 추가
-            userDTO.setUserSecretKey(encrtptJWT);
-            userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword())); // 비밀번호 인코딩
+            // 유저에게 현재 시간 추가
+            userDTO.setCreateAt(plus9Hours);
 
             // 닉네임을 입력하지 않았을 경우 이름으로 등록
             if(userDTO.getNickname().isEmpty()){
                 userDTO.setNickname(userDTO.getName());
             }
+
+            // jwt secret key
+            userDTO.setUserSecretKey(keyBytes);
+            
+            // 비밀번호 인코딩
+            userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 
             User user = modelMapper.map(userDTO, User.class);
 
@@ -132,9 +129,11 @@ public class UserService  {
 
             // Base64로 인코딩하여 JWT 시크릿 키 생성
             String jwtKey = Base64.getEncoder().encodeToString(keyBytes);
-            
-            // AWS KMS(AES 256)를 활용한 암호화
-            String encrtptJWT = aesUtil.encrypt(kmsClient, jwtKey);
+
+            // 랜덤한 AES키 생성
+            SecretKey aesKey = AESUtil.generateAESKey();
+
+            byte[] encrtptJWT = AESUtil.encrypt(jwtKey, aesKey);
 
             // 서울시간으로 가져오기 위해 + 9시간
             LocalDateTime currentDateTime = LocalDateTime.now();
@@ -148,6 +147,12 @@ public class UserService  {
                                         .userEmail(email)
                                         .nationalLanguage("kor_Hang")
                                         .build();
+//
+//            userDTO.setNickname("기본 닉네임");
+//            userDTO.setCredential(credential.substring(0, 500));
+//            userDTO.setCreateAt(plus9Hours);
+//            userDTO.setUserSecretKey(encrtptJWT);
+//            userDTO.setUserEmail(email);
 
             User user = modelMapper.map(userDTO, User.class);
 

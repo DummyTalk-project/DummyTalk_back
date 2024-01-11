@@ -42,7 +42,6 @@ public class UserController {
     private final UserService userService;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
-    /* 회원가입 */
     @PostMapping("/signUp")
     public ResponseEntity<ResponseDTO> signUp(@RequestBody UserDTO user){
 
@@ -64,7 +63,6 @@ public class UserController {
         }
     }
 
-    /* 구글 로그인 */
     @PostMapping("/googleLogin")
     public ResponseEntity<ResponseDTO> googleLogin(@RequestBody Map<String, String> credential) throws Exception {
 
@@ -77,7 +75,6 @@ public class UserController {
                 .body(new ResponseDTO(HttpStatus.OK, "구글 로그인에 성공하셨습니다.", result));
     }
 
-    /* 유저 조회 코드 */
     @GetMapping("/user/{userId}")
     public ResponseEntity<ResponseDTO> findByUser(@PathVariable String userId){
 
@@ -88,6 +85,7 @@ public class UserController {
                 .body(new ResponseDTO(HttpStatus.OK, "유저 조회에 성공하였습니다.", result));
     }
 
+<<<<<<< HEAD
     /* 친구 조회 */
     @GetMapping("friend/{userId}")
     public ResponseEntity<ResponseDTO> findFriend(@PathVariable int userId){
@@ -123,6 +121,11 @@ public class UserController {
     public void saveFriend(@DestinationVariable String userId,
                                                   Map<String, String> message){
 
+=======
+    @PostMapping("/friend/{userId}")
+    public ResponseEntity<ResponseDTO> saveFriend(@PathVariable String userId,
+                                                  @RequestBody Map<String, String> email){
+>>>>>>> 27af2cb9d059cce57439fa51f42df4571ed092b7
 
         try{
             FriendDTO result = userService.saveFriend(userId, message);
@@ -139,47 +142,6 @@ public class UserController {
 
     }
 
-    /* 친구 요청 조회 */
-    @GetMapping("friendRequest/{userId}")
-    public ResponseEntity<ResponseDTO> findFriendRequest(@PathVariable int userId){
-
-
-        List<UserDTO> result = userService.findByFriendRequest(userId);
-
-        return  ResponseEntity
-                .status(HttpStatus.OK)
-                .body(new ResponseDTO(HttpStatus.OK, "친구 요청 조회에 성공하셨습니다.", result));
-    }
-
-
-    /* 친구 요청 수락 */
-    @PostMapping("approval/{userId}")
-    public ResponseEntity<ResponseDTO> approval(@PathVariable int userId, @RequestBody Map<String, String> friendId){
-
-
-        friendId.get("friendId");
-        UserDTO result = userService.approval(userId, friendId.get("friendId"));
-
-        return  ResponseEntity
-                .status(HttpStatus.OK)
-                .body(new ResponseDTO(HttpStatus.OK, "친구 요청을 수락하셨습니다.", result));
-    }
-
-    /* 친구 요청 거절 */
-    @PostMapping("refusal/{userId}")
-    public ResponseEntity<ResponseDTO> refusal(@PathVariable int userId, @RequestBody Map<String, String> friendId){
-
-
-        friendId.get("friendId");
-        UserDTO result = userService.refusal(userId, friendId.get("friendId"));
-
-        return  ResponseEntity
-                .status(HttpStatus.OK)
-                .body(new ResponseDTO(HttpStatus.OK, "친구 요청을 거절하셨습니다.", result));
-
-    }
-
-    /* 비밀번호 변경 */
     @PostMapping("/changePassword")
     public ResponseEntity<ResponseDTO> changePassword(@RequestBody Map<String, String> user){
 
@@ -197,7 +159,28 @@ public class UserController {
         }
     }
 
-    /* 프로필 수정 */
+    @GetMapping("friend/{userId}")
+    public ResponseEntity<ResponseDTO> findFriend(@PathVariable int userId){
+
+
+        List<UserDTO> result = userService.findByFriend(userId);
+
+        return  ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ResponseDTO(HttpStatus.OK, "친구 조회에 성공하셨습니다.", result));
+    }
+
+    @GetMapping("friendRequest/{userId}")
+    public ResponseEntity<ResponseDTO> findFriendRequest(@PathVariable int userId){
+
+
+        List<UserDTO> result = userService.findByFriendRequest(userId);
+
+        return  ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ResponseDTO(HttpStatus.OK, "친구 요청 조회에 성공하셨습니다.", result));
+    }
+
     @PostMapping("change/{userId}")
     public ResponseEntity<ResponseDTO> changeUser (@PathVariable int userId,
                                                    @RequestParam(required = false) MultipartFile file,
@@ -210,6 +193,7 @@ public class UserController {
         formData.put("password", password);
         formData.put("language", language);
 
+        log.info("TESTTTTTTTTTTTT ===> {}" , file);
 
         try {
 
@@ -224,5 +208,31 @@ public class UserController {
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR,  e.getMessage(), null));
         }
+    }
+
+    @PostMapping("approval/{userId}")
+    public ResponseEntity<ResponseDTO> approval(@PathVariable int userId, @RequestBody Map<String, String> friendId){
+
+        log.info("TEST==========>{} " , friendId.get("friendId"));
+
+        friendId.get("friendId");
+        UserDTO result = userService.approval(userId, friendId.get("friendId"));
+
+        return  ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ResponseDTO(HttpStatus.OK, "친구 요청을 수락하셨습니다.", result));
+
+    }
+    @PostMapping("refusal/{userId}")
+    public ResponseEntity<ResponseDTO> refusal(@PathVariable int userId, @RequestBody Map<String, String> friendId){
+
+
+        friendId.get("friendId");
+        UserDTO result = userService.refusal(userId, friendId.get("friendId"));
+
+        return  ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ResponseDTO(HttpStatus.OK, "친구 요청을 거절하셨습니다.", result));
+
     }
 }

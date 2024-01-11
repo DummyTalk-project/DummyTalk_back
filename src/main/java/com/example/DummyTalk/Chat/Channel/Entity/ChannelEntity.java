@@ -41,6 +41,26 @@ public class ChannelEntity extends BaseTimeEntity {
     }
 
 
+    @Enumerated(EnumType.STRING)
+    @Column
+    private MaxUserCnt maxUserCnt; // 최대 유저 수 필드
+
+    public enum MaxUserCnt {
+        SIX(6),
+        ONE(1);
+
+        private final int value;
+
+        MaxUserCnt(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
+
+
     /* 서버와의 연관관계 (자식) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "server_id", updatable = false, insertable = false)
